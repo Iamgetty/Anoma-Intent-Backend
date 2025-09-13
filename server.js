@@ -1,12 +1,15 @@
 
 // server.js
-import express from "express";
-import cors from "cors";
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
-app.use(cors({
-  origin: "https://anoma-intent-wallet.vercel.app", // allow your frontend
-}));
+
+app.use(
+  cors({
+    origin: "https://anoma-intent-wallet.vercel.app", // allow your frontend
+  })
+);
 app.use(express.json());
 
 // ---- Mock Store ----
@@ -98,4 +101,4 @@ app.post("/api/intent", (req, res) => {
 
 // ---- Start server ----
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
