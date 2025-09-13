@@ -1,15 +1,10 @@
-
-// server.js
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
 
 const app = express();
-
-app.use(
-  cors({
-    origin: "https://anoma-intent-wallet.vercel.app", // allow your frontend
-  })
-);
+app.use(cors({
+  origin: "https://anoma-intent-wallet.vercel.app", // your frontend
+}));
 app.use(express.json());
 
 // ---- Mock Store ----
@@ -23,6 +18,9 @@ const store = {
 };
 
 // ---- Routes ----
+app.get("/", (req, res) => {
+  res.send("✅ Backend is running on Railway");
+});
 
 // Get balance
 app.get("/api/balance", (req, res) => {
@@ -57,15 +55,12 @@ app.get("/api/faucet", (req, res) => {
 // Send tokens
 app.post("/api/send", (req, res) => {
   const { from, to, token, amount } = req.body;
-
   if (!store.users[from] || !store.users[to]) {
     return res.status(400).json({ error: "Invalid user" });
   }
   if (store.users[from].balances[token] < amount) {
     return res.status(400).json({ error: "Insufficient balance" });
   }
-
-  // Transfer
   store.users[from].balances[token] -= amount;
   store.users[to].balances[token] += amount;
 
@@ -78,22 +73,13 @@ app.post("/api/send", (req, res) => {
 // Create intent
 app.post("/api/intent", (req, res) => {
   const { maker, action, amount, from_asset, to_asset } = req.body;
-
   if (!store.users[maker]) {
     return res.status(400).json({ error: "Invalid user" });
   }
   if (store.users[maker].balances[from_asset] < amount) {
     return res.status(400).json({ error: "Insufficient balance" });
   }
-
-  const intent = {
-    maker,
-    action,
-    amount,
-    from_asset,
-    to_asset,
-    status: "pending",
-  };
+  const intent = { maker, action, amount, from_asset, to_asset, status: "pending" };
   store.intents.push(intent);
 
   res.json({ intent });
@@ -101,4 +87,4 @@ app.post("/api/intent", (req, res) => {
 
 // ---- Start server ----
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
