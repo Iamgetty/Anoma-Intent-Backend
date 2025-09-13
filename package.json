@@ -2,12 +2,18 @@
   "name": "anoma-intent-backend",
   "version": "1.0.0",
   "main": "server.js",
-  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "express": "^4.19.2",
     "cors": "^2.8.5"
+=======
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "uuid": "^9.0.1"
+>>>>>>> 4673a16 (fix: backend to commonjs)
   }
 }

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import express from "express";
 import cors from "cors";
+=======
+const express = require("express");
+const cors = require("cors");
+>>>>>>> 4673a16 (fix: backend to commonjs)
 
 const app = express();
 app.use(cors({
@@ -87,4 +92,10 @@ app.post("/api/intent", (req, res) => {
 
 // ---- Start server ----
 const PORT = process.env.PORT || 4000;
+<<<<<<< HEAD
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+=======
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+>>>>>>> 4673a16 (fix: backend to commonjs)
