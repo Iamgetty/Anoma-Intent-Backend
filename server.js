@@ -1,15 +1,18 @@
-<<<<<<< HEAD
-import express from "express";
-import cors from "cors";
-=======
+// server.js
 const express = require("express");
 const cors = require("cors");
->>>>>>> 4673a16 (fix: backend to commonjs)
 
 const app = express();
-app.use(cors({
-  origin: "https://anoma-intent-wallet.vercel.app", // your frontend
-}));
+
+// ✅ Allow your frontend on Vercel
+app.use(
+  cors({
+    origin: "https://anoma-intent-wallet.vercel.app", // frontend
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // ---- Mock Store ----
@@ -66,6 +69,7 @@ app.post("/api/send", (req, res) => {
   if (store.users[from].balances[token] < amount) {
     return res.status(400).json({ error: "Insufficient balance" });
   }
+
   store.users[from].balances[token] -= amount;
   store.users[to].balances[token] += amount;
 
@@ -84,7 +88,15 @@ app.post("/api/intent", (req, res) => {
   if (store.users[maker].balances[from_asset] < amount) {
     return res.status(400).json({ error: "Insufficient balance" });
   }
-  const intent = { maker, action, amount, from_asset, to_asset, status: "pending" };
+
+  const intent = {
+    maker,
+    action,
+    amount,
+    from_asset,
+    to_asset,
+    status: "pending",
+  };
   store.intents.push(intent);
 
   res.json({ intent });
@@ -92,10 +104,7 @@ app.post("/api/intent", (req, res) => {
 
 // ---- Start server ----
 const PORT = process.env.PORT || 4000;
-<<<<<<< HEAD
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-=======
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
->>>>>>> 4673a16 (fix: backend to commonjs)
+
