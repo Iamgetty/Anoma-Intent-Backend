@@ -1,13 +1,13 @@
-// server.js
+// server.js - CommonJS version for Railway
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 
-// ✅ Allow your frontend on Vercel
+// CORS: allow your deployed frontend on Vercel
 app.use(
   cors({
-    origin: "https://anoma-intent-wallet.vercel.app", // frontend
+    origin: "https://anoma-intent-wallet.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -15,7 +15,7 @@ app.use(
 
 app.use(express.json());
 
-// ---- Mock Store ----
+// In-memory demo store
 const store = {
   users: {
     alice: { balances: { ETH: 100, XAN: 50 } },
@@ -25,86 +25,55 @@ const store = {
   intents: [],
 };
 
-// ---- Routes ----
-app.get("/", (req, res) => {
-  res.send("✅ Backend is running on Railway");
-});
+// Health check
+app.get("/api/health", (req, res) => res.json({ status: "ok", env: process.env.NODE_ENV || "dev" }));
 
-// Get balance
+// Routes
 app.get("/api/balance", (req, res) => {
   const { user } = req.query;
-  if (!store.users[user]) {
-    return res.status(400).json({ error: "Unknown user" });
-  }
-  res.json({ user, balances: store.users[user].balances });
+  if (!user || !store.users[user]) return res.status(400).json({ error: "Unknown user" });
+  return res.json({ user, balances: store.users[user].balances });
 });
 
-// Get transactions
-app.get("/api/txs", (req, res) => {
-  res.json(store.txs);
-});
+app.get("/api/txs", (req, res) => res.json(store.txs));
+app.get("/api/intents", (req, res) => res.json(store.intents));
 
-// Get intents
-app.get("/api/intents", (req, res) => {
-  res.json(store.intents);
-});
-
-// Faucet
 app.get("/api/faucet", (req, res) => {
   const { user } = req.query;
-  if (!store.users[user]) {
-    return res.status(400).json({ error: "Unknown user" });
-  }
+  if (!user || !store.users[user]) return res.status(400).json({ error: "Unknown user" });
   store.users[user].balances.ETH += 100;
   store.users[user].balances.XAN += 100;
-  res.json({ user, balances: store.users[user].balances });
+  return res.json({ user, balances: store.users[user].balances });
 });
 
-// Send tokens
 app.post("/api/send", (req, res) => {
   const { from, to, token, amount } = req.body;
-  if (!store.users[from] || !store.users[to]) {
-    return res.status(400).json({ error: "Invalid user" });
-  }
-  if (store.users[from].balances[token] < amount) {
+  if (!store.users[from] || !store.users[to]) return res.status(400).json({ error: "Invalid user" });
+  if (typeof amount !== "number" || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+  if (!store.users[from].balances[token] || store.users[from].balances[token] < amount) {
     return res.status(400).json({ error: "Insufficient balance" });
   }
-
   store.users[from].balances[token] -= amount;
   store.users[to].balances[token] += amount;
-
-  const tx = { from, to, token, amount, time: new Date().toISOString() };
+  const tx = { from, to, token, amount, time: new Date().toISOString(), type: "send" };
   store.txs.push(tx);
-
-  res.json({ tx, senderBalance: store.users[from] });
+  return res.json({ tx, senderBalance: store.users[from] });
 });
 
-// Create intent
 app.post("/api/intent", (req, res) => {
   const { maker, action, amount, from_asset, to_asset } = req.body;
-  if (!store.users[maker]) {
-    return res.status(400).json({ error: "Invalid user" });
-  }
-  if (store.users[maker].balances[from_asset] < amount) {
+  if (!store.users[maker]) return res.status(400).json({ error: "Invalid user" });
+  if (typeof amount !== "number" || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+  if (!store.users[maker].balances[from_asset] || store.users[maker].balances[from_asset] < amount) {
     return res.status(400).json({ error: "Insufficient balance" });
   }
-
-  const intent = {
-    maker,
-    action,
-    amount,
-    from_asset,
-    to_asset,
-    status: "pending",
-  };
+  const intent = { maker, action, amount, from_asset, to_asset, status: "pending", time: new Date().toISOString() };
   store.intents.push(intent);
-
-  res.json({ intent });
+  return res.json({ intent });
 });
 
-// ---- Start server ----
+// Start server (Railway requires process.env.PORT)
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
