@@ -1,4 +1,3 @@
-
 {
   "name": "anoma-intent-backend",
   "version": "1.0.0",
@@ -7,7 +6,8 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.21.2",
-    "cors": "^2.8.5"
+    "node-fetch": "^3.3.2"
   }
 }
